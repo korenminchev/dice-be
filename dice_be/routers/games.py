@@ -19,9 +19,9 @@ async def create_game():
     return playground.create_game()
 
 
-@router.get('/{code}', response_model=GameData)
-async def get_game(code: Code):
-    return playground.get_game(code)
+@router.get('/{code}/', response_model=GameData)
+async def get_game(code: str):
+    return playground.get_game(code).game_data
 
 
 @router.websocket("/{code}/ws")

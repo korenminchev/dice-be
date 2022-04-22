@@ -11,7 +11,7 @@ class Playground:
 
     def create_game(self) -> Code:
         code = self._generate_code()
-        self.current_games[code] = GameManager()
+        self.current_games[code] = GameManager(code)
         return code
 
     def end_game(self, code: Code):
