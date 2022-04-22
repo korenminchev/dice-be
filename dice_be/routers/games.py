@@ -4,6 +4,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from .users import get_user_by_id
 from ..dependencies import playground
+from ..exceptions import GameNotFound
 from ..managers.games import GameManager
 from ..models.games import Code, GameData
 from ..models.users import User
@@ -19,7 +20,7 @@ async def create_game():
     return playground.create_game()
 
 
-@router.get('/{code}/', response_model=GameData)
+@router.get('/{code}/', response_model=GameData, responses=GameNotFound.response())
 async def get_game(code: str):
     return playground.get_game(code).game_data
 
