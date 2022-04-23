@@ -1,18 +1,24 @@
+"""
+Main execution point for Dice Backend
+"""
+
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from .exceptions import IDNotFound, GameNotFound
-from .routers import users, games
+from dice_be.exceptions import NotFoundHttpError
+from dice_be.routers import users, games
 
 app = FastAPI()
 app.include_router(users.router)
 app.include_router(games.router)
 
-app.add_exception_handler(IDNotFound, IDNotFound.handler)
-app.add_exception_handler(GameNotFound, GameNotFound.handler)
+app.add_exception_handler(NotFoundHttpError, NotFoundHttpError.handler)
 
 
 def custom_openapi():
+    """
+    Defines custom openapi parameters for Dice
+    """
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
