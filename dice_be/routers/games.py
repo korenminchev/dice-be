@@ -30,13 +30,13 @@ async def create_game():
 @router.get('/{code}/', response_model=GameData, responses=GameNotFound.response())
 async def get_game(code: str):
     """
-    Get info about the game, use this before attempting to join via the websocket
+    Get info about the game, use this before attempting to join
     """
     return playground.get_game(code).game_data
 
 
 # pylint:disable=redefined-builtin, invalid-name
-@router.websocket("/{code}/ws")
+@router.websocket("/{code}/ws/")
 async def websocket_endpoint(code: Code, websocket: WebSocket, id: ObjectId = Header(...)):
     """
     API to join a game

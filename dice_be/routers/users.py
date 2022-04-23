@@ -46,7 +46,7 @@ async def create_user(name: str = Body(..., embed=True)):
 
 
 # pylint:disable=redefined-builtin, invalid-name
-@router.get('/{id}', response_model=User, responses=IDNotFound.response(), name='Get User by ID')
+@router.get('/{id}/', response_model=User, responses=IDNotFound.response(), name='Get User by ID')
 async def get_user_by_id_endpoint(id: ObjectId):
     """
     Retrieve a single user by their ID
@@ -55,7 +55,7 @@ async def get_user_by_id_endpoint(id: ObjectId):
 
 
 # pylint:disable=redefined-builtin, invalid-name
-@router.post('/{id}/friends', response_model=User, responses=IDNotFound.response())
+@router.post('/{id}/friends/', response_model=User, responses=IDNotFound.response())
 async def add_friends(id: ObjectId, friends: List[ObjectId] = Body(..., embed=True)):
     """
     Add a multiple friends to a single user by their IDs
