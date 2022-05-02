@@ -30,14 +30,14 @@ async def create_game():
 @router.get('/{code}/', response_model=GameData, responses=GameNotFound.response())
 async def get_game(code: str):
     """
-    Get info about the game, use this before attempting to join
+    Gets all the info about a game
     """
     return playground.get_game(code).game_data
 
 @router.get('/{code}/state', response_model=GameState, responses=GameNotFound.response())
 async def get_game_state(code: str):
     """
-    Get info about the game, use this before attempting to join
+    Gets the state of a game, use this before attempting to join
     """
     return playground.get_game(code).game_data.state
 
