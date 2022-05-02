@@ -10,7 +10,7 @@ from dice_be.routers.users import get_user_by_id
 from dice_be.dependencies import playground
 from dice_be.exceptions import GameNotFound
 from dice_be.managers.games import GameManager
-from dice_be.models.games import Code, GameData
+from dice_be.models.games import Code, GameData, GameState
 from dice_be.models.users import User
 
 router = APIRouter(
@@ -33,6 +33,13 @@ async def get_game(code: str):
     Get info about the game, use this before attempting to join
     """
     return playground.get_game(code).game_data
+
+@router.get('/{code}/state', response_model=GameState, responses=GameNotFound.response())
+async def get_game_state(code: str):
+    """
+    Get info about the game, use this before attempting to join
+    """
+    return playground.get_game(code).game_data.state
 
 
 # pylint:disable=redefined-builtin, invalid-name
