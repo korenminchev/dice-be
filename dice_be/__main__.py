@@ -28,7 +28,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "https://raw.githubusercontent.com/Koren13n/dice-fe/feature/home_page/assets/images/dice_logo.png"
+        "url": "https://raw.githubusercontent.com/Koren13n/dice-fe/master/assets/images/dice_logo.png"
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
