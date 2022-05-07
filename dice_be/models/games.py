@@ -23,5 +23,5 @@ class GameData(Model):
     Data of an active game
     """
     code: Code
-    state: GameState
+    state: GameState = GameState.LOBBY
     players: List[ObjectId] = []
