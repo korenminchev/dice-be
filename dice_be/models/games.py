@@ -1,27 +1,57 @@
 """
 Models for games and game metadata
 """
+import random
 from enum import Enum
-from typing import TypeAlias, List
+from typing import TypeAlias, List, Literal
 
-from odmantic import Model, ObjectId
+from odmantic import ObjectId
+from pydantic import conint, PositiveInt, Field
+
+from dice_be.models.utils import MongoModel, OID
 
 Code: TypeAlias = str
+Dice: TypeAlias = conint(ge=1, le=6)
 
 # pylint: disable=abstract-method
-class GameState(str, Enum):
+class GameProgression(str, Enum):
     """
     Represents the current state of the game
     """
     LOBBY = 'lobby'
-    IN_GAME = 'in game'
+    IN_GAME = 'in_game'
 
 
-# pylint: disable=abstract-method
-class GameData(Model):
+class PlayerData(MongoModel):
+    name: str = ''
+    dice: List[Dice] = []
+    mistakes: PositiveInt = 0
+
+    def roll_dice(self, max_dice: int):
+        self.dice = [random.randint(1, 6) for _ in range(max_dice - self.mistakes)]
+
+
+class GameRules(MongoModel):
+    initial_dice_count: int = 5
+    paso_allowed: bool = True
+    exact_allowed: bool = True
+
+
+class GameData(MongoModel):
     """
     Data of an active game
     """
+    event: Literal['game_update'] = 'game_update'
     code: Code
-    state: GameState = GameState.LOBBY
-    players: List[ObjectId] = []
+    progression: GameProgression = GameProgression.LOBBY
+    rules: GameRules = GameRules()
+    players: dict[OID, PlayerData] = {}
+
+    def add_player(self, player_id: OID, player_name: str):
+        self.players[player_id] = PlayerData(name=player_name)
+
+    def lobby_dict(self):
+        return self.dict(exclude={'players': {'__all__': {'dice', 'mistakes'}}})
+
+    def player_update_dict(self):
+        return self.dict(include={'event': True, 'players': {'__all__': {'name'}}})

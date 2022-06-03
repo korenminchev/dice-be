@@ -1,6 +1,8 @@
 """
 Connection management
 """
+import asyncio
+from typing import Iterable
 
 from odmantic import ObjectId
 from starlette.websockets import WebSocket
@@ -32,3 +34,15 @@ class ConnectionManager:
         to be already disconnected
         """
         del self.connections[client.id]
+
+    async def send(self, client: ObjectId, data: dict):
+        print('sending ')
+        await self.connections[client].send_json(data)
+
+    async def broadcast(self, data, *, exclude_ids=set[ObjectId]):
+        """
+        Broadcast a message to all clients
+        """
+        await asyncio.gather(
+            connection.send_json(data) for client, connection in self.connections.values() if client not in exclude_ids
+        )
