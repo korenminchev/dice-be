@@ -25,7 +25,7 @@ def test_strict_pydantic():
 
 def test_game_data():
     gd = GameData(event='game_update', code=1234, players={})
-    assert gd.player_update_dict() == {
+    assert json.loads(gd.player_update_json()) == {
         'event': 'game_update',
         'players': {},
     }

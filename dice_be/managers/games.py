@@ -7,7 +7,7 @@ from fastapi import WebSocket
 
 from dice_be.models.games import GameData, Code, GameProgression
 from dice_be.models.users import User
-from dice_be.models.game_events import GameJoin, Event, GameStart
+from dice_be.models.game_events import Event
 from dice_be.managers.connection import ConnectionManager
 
 
@@ -27,9 +27,9 @@ class GameManager:
         await self.connection_manager.add_connection(player, connection)
 
         await asyncio.gather(
-            self.connection_manager.send(player.id, self.game_data.lobby_dict()),
+            self.connection_manager.send(player.id, self.game_data.lobby_json()),
             self.connection_manager.broadcast(
-                self.game_data.player_update_dict(),
+                self.game_data.player_update_json(),
                 exclude_ids={player.id}
             )
         )
@@ -56,4 +56,4 @@ class GameManager:
 
     async def handle_game_start(self):
         self.game_data.progression = GameProgression.IN_GAME
-        await self.connection_manager.broadcast(GameStart())
+        # await self.connection_manager.broadcast()

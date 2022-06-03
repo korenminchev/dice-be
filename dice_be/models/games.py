@@ -5,8 +5,7 @@ import random
 from enum import Enum
 from typing import TypeAlias, List, Literal
 
-from odmantic import ObjectId
-from pydantic import conint, PositiveInt, Field
+from pydantic import conint, PositiveInt
 
 from dice_be.models.utils import MongoModel, OID
 
@@ -50,8 +49,8 @@ class GameData(MongoModel):
     def add_player(self, player_id: OID, player_name: str):
         self.players[player_id] = PlayerData(name=player_name)
 
-    def lobby_dict(self):
-        return self.dict(exclude={'players': {'__all__': {'dice', 'mistakes'}}})
+    def lobby_json(self) -> str:
+        return self.json(exclude={'players': {'__all__': {'dice', 'mistakes'}}})
 
-    def player_update_dict(self):
-        return self.dict(include={'event': True, 'players': {'__all__': {'name'}}})
+    def player_update_json(self) -> str:
+        return self.json(include={'event': True, 'players': {'__all__': {'name'}}})

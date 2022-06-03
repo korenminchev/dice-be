@@ -23,9 +23,8 @@ class ConnectionManager:
 
     async def add_connection(self, client: User, connection: WebSocket):
         """
-        Registered a new client
+        Registered a new client, assumes the connection is already accepted
         """
-        await connection.accept()
         self.connections[client.id] = connection
 
     def remove_connection(self, client: User):
@@ -35,14 +34,14 @@ class ConnectionManager:
         """
         del self.connections[client.id]
 
-    async def send(self, client: ObjectId, data: dict):
+    async def send(self, client: ObjectId, data: str):
         print('sending ')
-        await self.connections[client].send_json(data)
+        await self.connections[client].send_text(data)
 
-    async def broadcast(self, data, *, exclude_ids=set[ObjectId]):
+    async def broadcast(self, data: str, *, exclude_ids=set[ObjectId]):
         """
         Broadcast a message to all clients
         """
         await asyncio.gather(
-            connection.send_json(data) for client, connection in self.connections.values() if client not in exclude_ids
+            connection.send_text(data) for client, connection in self.connections.values() if client not in exclude_ids
         )

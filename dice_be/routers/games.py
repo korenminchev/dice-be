@@ -2,7 +2,7 @@
 Handle all game related API
 """
 
-from fastapi import APIRouter, WebSocket, Header
+from fastapi import APIRouter, WebSocket
 from odmantic import ObjectId
 from starlette.websockets import WebSocketDisconnect
 
@@ -50,13 +50,12 @@ async def websocket_endpoint(code: Code, websocket: WebSocket):
 
     :param code: Code of the game the client wants to join
     :param websocket: The websocket that the client is connecting on
-    :param id: The ID of the user that wants to connect
     """
     await websocket.accept()
 
     id = (await websocket.receive_json())['id']
 
-    user: User = await get_user_by_id(id)
+    user: User = await get_user_by_id(ObjectId(id))
     game: GameManager = playground.get_game(code)
 
     await game.add_player(user, websocket)
