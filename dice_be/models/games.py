@@ -5,8 +5,10 @@ import random
 from enum import Enum
 from typing import TypeAlias, List, Literal
 
-from pydantic import conint, PositiveInt
+from bson import ObjectId
+from pydantic import conint, PositiveInt, Field
 
+from dice_be.models.users import User
 from dice_be.models.utils import MongoModel, OID
 
 Code: TypeAlias = str
@@ -22,9 +24,11 @@ class GameProgression(str, Enum):
 
 
 class PlayerData(MongoModel):
+    id: OID = Field(default_factory=lambda: OID(ObjectId()))
     name: str = ''
     dice: List[Dice] = []
     mistakes: PositiveInt = 0
+    ready: bool = False
 
     def roll_dice(self, max_dice: int):
         self.dice = [random.randint(1, 6) for _ in range(max_dice - self.mistakes)]
@@ -40,17 +44,23 @@ class GameData(MongoModel):
     """
     Data of an active game
     """
-    event: Literal['game_update'] = 'game_update'
+    event: Literal['game_update']
     code: Code
     progression: GameProgression = GameProgression.LOBBY
     rules: GameRules = GameRules()
-    players: dict[OID, PlayerData] = {}
+    players: list[PlayerData] = []
+    admin: PlayerData = None
 
-    def add_player(self, player_id: OID, player_name: str):
-        self.players[player_id] = PlayerData(name=player_name)
+    def add_player(self, player: User):
+        self.players.append(player := PlayerData(id=player.id, name=player.name))
+        return player
 
     def lobby_json(self) -> str:
-        return self.json(exclude={'players': {'__all__': {'dice', 'mistakes'}}})
+        return self.json(exclude={'players': {'__all__': {'dice', 'mistakes'}},
+                                  'admin': {'__all__': {'dice', 'mistakes'}}})
 
     def player_update_json(self) -> str:
-        return self.json(include={'event': True, 'players': {'__all__': {'name'}}})
+        return self.json(include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}})
+
+    def progression_update_json(self) -> str:
+        return self.json(include={'event', 'progression'})

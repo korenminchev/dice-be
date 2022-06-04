@@ -3,7 +3,7 @@ Handle all game related API
 """
 
 from fastapi import APIRouter, WebSocket
-from odmantic import ObjectId
+from bson import ObjectId
 from starlette.websockets import WebSocketDisconnect
 
 from dice_be.routers.users import get_user_by_id
@@ -41,6 +41,12 @@ async def get_game_state(code: str):
     """
     return playground.get_game(code).game_data.progression
 
+@router.get('/{code}/{user_id}}', response_model=bool, responses=GameNotFound.response())
+async def check_player_in_game(code: str, user_id: ObjectId):
+    """
+    Checks if the player is in the game
+    """
+    return user_id in playground.get_game(code).player_mapping
 
 # pylint:disable=redefined-builtin, invalid-name
 @router.websocket("/{code}/ws/")
@@ -53,12 +59,12 @@ async def websocket_endpoint(code: Code, websocket: WebSocket):
     """
     await websocket.accept()
 
-    id = (await websocket.receive_json())['id']
+    user_id = (await websocket.receive_json())['id']
 
-    user: User = await get_user_by_id(ObjectId(id))
+    user: User = await get_user_by_id(ObjectId(user_id))
     game: GameManager = playground.get_game(code)
 
-    await game.add_player(user, websocket)
+    await game.handle_connect(user, websocket)
     try:
         while True:
             data = await websocket.receive_json()

@@ -2,6 +2,7 @@
 Connection management
 """
 import asyncio
+import json
 from typing import Iterable
 
 from odmantic import ObjectId
@@ -21,7 +22,7 @@ class ConnectionManager:
     def __getitem__(self, client: User) -> WebSocket:
         return self.connections.__getitem__(client.id)
 
-    async def add_connection(self, client: User, connection: WebSocket):
+    def add_connection(self, client: User, connection: WebSocket):
         """
         Registered a new client, assumes the connection is already accepted
         """
@@ -34,14 +35,21 @@ class ConnectionManager:
         """
         del self.connections[client.id]
 
-    async def send(self, client: ObjectId, data: str):
-        print('sending ')
-        await self.connections[client].send_text(data)
+    async def send(self, client: User, data: str | dict):
+        if isinstance(data, dict):
+            data = json.dumps(data)
 
-    async def broadcast(self, data: str, *, exclude_ids=set[ObjectId]):
+        await self.connections[client.id].send_text(data)
+
+    async def broadcast(self, data: str | dict, *, exclude=Iterable[User]):
         """
         Broadcast a message to all clients
         """
+        exclude_ids = set(user.id for user in exclude)
+
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
         await asyncio.gather(
-            connection.send_text(data) for client, connection in self.connections.values() if client not in exclude_ids
+            connection.send_text(data) for client, connection in self.connections.items() if client not in exclude_ids
         )

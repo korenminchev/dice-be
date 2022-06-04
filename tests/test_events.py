@@ -3,15 +3,9 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from dice_be.models.game_events import Event, GameJoin, RoundStart
+from dice_be.models.game_events import Event, RoundStart
 from dice_be.models.games import PlayerData, GameData
 
-
-def test_game_join():
-    j = {'event': 'game_join', 'joined_player_id': '628d3f09086ffea0571081b3'}
-    m = Event.parse_obj(j).__root__
-    assert type(m) == GameJoin
-    assert json.loads(m.json()) == j
 
 def test_round_start():
     pd = PlayerData(dice=[1, 2, 3])
@@ -24,8 +18,15 @@ def test_strict_pydantic():
         _ = Event.parse_obj(j)
 
 def test_game_data():
-    gd = GameData(event='game_update', code=1234, players={})
-    assert json.loads(gd.player_update_json()) == {
-        'event': 'game_update',
-        'players': {},
-    }
+    gd = GameData(event='game_update', code=1234, players=[PlayerData(dice=[1, 2, 3]), PlayerData(dice=[4, 5, 6])])
+    player_update_dict = json.loads(gd.player_update_json())
+    assert player_update_dict['event'] == 'game_update'
+    assert all('name' in p for p in player_update_dict['players'])
+    assert all('id' in p for p in player_update_dict['players'])
+    assert all('dice' not in p for p in player_update_dict['players'])
+
+    lobby_json = json.loads(gd.lobby_json())
+    assert lobby_json['event'] == 'game_update'
+    assert 'admin' in lobby_json
+    assert all('dice' not in p for p in player_update_dict['players'])
+
