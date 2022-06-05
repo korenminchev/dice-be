@@ -16,7 +16,7 @@ class GameManager:
     Manages the progression of a single game
     """
     def __init__(self, code: Code, game_rules: GameRules):
-        self.game_data = GameData(event='game_update', code=code, game_rules=game_rules)
+        self.game_data = GameData(event='game_update', code=code, rules=game_rules)
         self.player_mapping: dict[ObjectId, PlayerData] = {}
         self.connection_manager = ConnectionManager()
 
