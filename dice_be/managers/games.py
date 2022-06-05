@@ -5,7 +5,7 @@ Game logic management
 from bson import ObjectId
 from fastapi import WebSocket
 
-from dice_be.models.games import GameData, Code, GameProgression, PlayerData
+from dice_be.models.games import GameData, Code, GameProgression, GameRules, PlayerData
 from dice_be.models.users import User
 from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm
 from dice_be.managers.connection import ConnectionManager
@@ -15,8 +15,8 @@ class GameManager:
     """
     Manages the progression of a single game
     """
-    def __init__(self, code: Code):
-        self.game_data = GameData(event='game_update', code=code)
+    def __init__(self, code: Code, game_rules: GameRules):
+        self.game_data = GameData(event='game_update', code=code, game_rules=game_rules)
         self.player_mapping: dict[ObjectId, PlayerData] = {}
         self.connection_manager = ConnectionManager()
 

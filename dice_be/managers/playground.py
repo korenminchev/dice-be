@@ -6,7 +6,7 @@ from random import randint
 
 from dice_be.managers.games import GameManager
 from dice_be.exceptions import GameNotFound
-from dice_be.models.games import Code
+from dice_be.models.games import Code, GameRules
 
 
 class Playground:
@@ -18,13 +18,13 @@ class Playground:
     def __init__(self):
         self.current_games: dict[Code, GameManager] = {}
 
-    def create_game(self) -> Code:
+    def create_game(self, game_rules: GameRules) -> Code:
         """
         Creates a new game in the playground
         :return: The code of the game (used for joining)
         """
         code = self._generate_code()
-        self.current_games[code] = GameManager(code)
+        self.current_games[code] = GameManager(code, game_rules)
         return code
 
     def delete_game(self, code: Code):

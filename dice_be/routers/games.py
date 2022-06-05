@@ -2,7 +2,7 @@
 Handle all game related API
 """
 
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, Body, WebSocket
 from bson import ObjectId
 from starlette.websockets import WebSocketDisconnect
 
@@ -10,7 +10,7 @@ from dice_be.routers.users import get_user_by_id
 from dice_be.dependencies import playground
 from dice_be.exceptions import GameNotFound
 from dice_be.managers.games import GameManager
-from dice_be.models.games import Code, GameData, GameProgression
+from dice_be.models.games import Code, GameData, GameProgression, GameRules
 from dice_be.models.users import User
 
 router = APIRouter(
@@ -20,11 +20,11 @@ router = APIRouter(
 
 
 @router.post('/', response_model=Code)
-async def create_game():
+async def create_game(game_rules: GameRules = Body(..., embed=True)):
     """
     Creates a new game
     """
-    return playground.create_game()
+    return playground.create_game(game_rules)
 
 
 @router.get('/{code}/', response_model=GameData, responses=GameNotFound.response())
