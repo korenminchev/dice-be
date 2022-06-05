@@ -29,6 +29,8 @@ class PlayerData(MongoModel):
     dice: List[Dice] = []
     mistakes: PositiveInt = 0
     ready: bool = False
+    left_player_id: OID = None
+    right_player_id: OID = None
 
     def roll_dice(self, max_dice: int):
         self.dice = [random.randint(1, 6) for _ in range(max_dice - self.mistakes)]
@@ -55,9 +57,8 @@ class GameData(MongoModel):
         self.players.append(player := PlayerData(id=player.id, name=player.name))
         return player
 
-    def lobby_json(self) -> str:
-        return self.json(exclude={'players': {'__all__': {'dice', 'mistakes'}},
-                                  'admin': {'__all__': {'dice', 'mistakes'}}})
+    def lobby_json(self, data_filter: set[str]) -> str:
+        return self.json(include={'event', 'rules', 'players', 'admin'} | data_filter)
 
     def player_update_json(self) -> str:
         return self.json(include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}})

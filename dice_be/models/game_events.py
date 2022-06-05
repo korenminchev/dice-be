@@ -12,7 +12,22 @@ class PlayerReady(MongoModel):
     Broadcast from server
     """
     event: Literal['player_ready']
+    ready: bool
+    player_on_left: OID
+    player_on_right: OID
 
+
+class ReadyConfirm(MongoModel):
+    event: Literal['ready_confirm'] = 'ready_confirm'
+    success: bool
+    error: str = None
+
+
+class PlayerLeave(MongoModel):
+    """
+    Signals to the server that the player is leaving
+    """
+    event: Literal['player_leave']
 
 class RoundStart(MongoModel):
     event: Literal['round_start'] = 'round_start'
@@ -30,5 +45,5 @@ class Accusation(MongoModel):
     dice_count: int
 
 class Event(MongoModel):
-    __root__: Union[PlayerReady, GameData] = Field(..., discriminator='event')
+    __root__: Union[PlayerReady, PlayerLeave, GameData] = Field(..., discriminator='event')
 

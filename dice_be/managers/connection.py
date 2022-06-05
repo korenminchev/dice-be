@@ -6,6 +6,7 @@ import json
 from typing import Iterable
 
 from odmantic import ObjectId
+from pydantic import BaseModel
 from starlette.websockets import WebSocket
 
 from dice_be.models.users import User
@@ -28,20 +29,28 @@ class ConnectionManager:
         """
         self.connections[client.id] = connection
 
+    async def disconnect(self, client: User):
+        """
+        Explicitly disconnect a client
+        """
+        await self.connections[client.id].close()
+
     def remove_connection(self, client: User):
         """
-        Unregisters a client, by the time this is called - nothing is sent on the websocket, the client is assumed
-        to be already disconnected
+        Unregisters a client, by the time this is called - nothing is sent on the websocket,
+        which is assumed to be already closed
         """
         del self.connections[client.id]
 
-    async def send(self, client: User, data: str | dict):
+    async def send(self, client: User, data: str | dict | BaseModel):
         if isinstance(data, dict):
             data = json.dumps(data)
+        elif isinstance(data, BaseModel):
+            data = data.json()
 
         await self.connections[client.id].send_text(data)
 
-    async def broadcast(self, data: str | dict, *, exclude=Iterable[User]):
+    async def broadcast(self, data: str | dict, *, exclude: Iterable[User] = ()):
         """
         Broadcast a message to all clients
         """
@@ -51,5 +60,6 @@ class ConnectionManager:
             data = json.dumps(data)
 
         await asyncio.gather(
-            connection.send_text(data) for client, connection in self.connections.items() if client not in exclude_ids
+            *(connection.send_text(data)
+              for client, connection in self.connections.items() if client not in exclude_ids)
         )
