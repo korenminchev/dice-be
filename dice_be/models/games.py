@@ -49,7 +49,7 @@ class GameData(MongoModel):
     event: Literal['game_update']
     code: Code
     progression: GameProgression = GameProgression.LOBBY
-    rules: GameRules = GameRules()
+    rules: GameRules
     players: list[PlayerData] = []
     admin: PlayerData = None
 
