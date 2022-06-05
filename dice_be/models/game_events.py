@@ -13,8 +13,8 @@ class PlayerReady(MongoModel):
     """
     event: Literal['player_ready']
     ready: bool
-    player_on_left: OID
-    player_on_right: OID
+    left_player_id: OID
+    right_player_id: OID
 
 
 class ReadyConfirm(MongoModel):

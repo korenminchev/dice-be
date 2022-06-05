@@ -57,11 +57,13 @@ class GameData(MongoModel):
         self.players.append(player := PlayerData(id=player.id, name=player.name))
         return player
 
-    def lobby_json(self, data_filter: set[str]) -> str:
-        return self.json(include={'event', 'rules', 'players', 'admin'} | data_filter)
+    def lobby_json(self, *data_filter) -> str:
+        includes = {'event', 'progression', 'rules', 'players', 'admin'}
+
+        if not data_filter:
+            return self.json(include=includes)
+
+        return self.json(include=includes & (set(data_filter) | {'event'}))
 
     def player_update_json(self) -> str:
         return self.json(include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}})
-
-    def progression_update_json(self) -> str:
-        return self.json(include={'event', 'progression'})

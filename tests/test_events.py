@@ -25,8 +25,9 @@ def test_game_data():
     assert all('id' in p for p in player_update_dict['players'])
     assert all('dice' not in p for p in player_update_dict['players'])
 
-    lobby_json = json.loads(gd.lobby_json())
+    lobby_json = json.loads(gd.lobby_json({'players', 'admin'}))
     assert lobby_json['event'] == 'game_update'
     assert 'admin' in lobby_json
+    assert 'rules' not in lobby_json
     assert all('dice' not in p for p in player_update_dict['players'])
 
