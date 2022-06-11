@@ -1,14 +1,14 @@
 """
 Game logic management
 """
+import asyncio
 
-from secrets import choice
 from bson import ObjectId
 from fastapi import WebSocket
 
-from dice_be.models.games import GameData, Code, GameProgression, GameRules, GameStart, PlayerData
+from dice_be.models.games import GameData, Code, GameProgression, GameRules, PlayerData
 from dice_be.models.users import User
-from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm
+from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm, GameStart, RoundStart
 from dice_be.managers.connection import ConnectionManager
 
 
@@ -43,12 +43,11 @@ class GameManager:
 
         # This means that the player is new (not reconnecting)
         if player.id not in self.player_mapping:
-            self.player_mapping[player.id] = PlayerData(id=player.id, name=player.name)
-            self.game_data.add_player(player)
+            self.player_mapping[player.id] = self.game_data.add_player(player)
 
             await self.connection_manager.broadcast(
                 self.game_data.player_update_json(),
-                exclude=(player,)
+                exclude=player
             )
 
         # Send the lobby data to the player
@@ -58,7 +57,7 @@ class GameManager:
         await self.connection_manager.disconnect(player)
         player_data = self.player_mapping.pop(player.id)
         self.game_data.players.remove(player_data)
-        await self.connection_manager.broadcast(self.game_data.player_update_json())
+        await self.connection_manager.broadcast(self.game_data.player_update_json(), exclude=player)
 
     async def handle_disconnect(self, player: User):
         """
@@ -74,11 +73,10 @@ class GameManager:
         # Initialize all players dice count
         for player in self.game_data.players:
             player.current_dice_count = self.game_data.rules.initial_dice_count
-        self.game_data.progression = GameProgression.IN_GAME
-        starting_player = choice(self.game_data.players)
-        await self.connection_manager.broadcast(GameStart(starting_player_id=starting_player.id).json())
-        await self.start_round()
 
+        self.game_data.progression = GameProgression.IN_GAME
+        await self.connection_manager.broadcast(GameStart(rules=self.game_data.rules).json())
+        await self.start_round()
 
     def check_position(self, player: User, data: PlayerReady) -> tuple[bool, str | None]:
         # Player is setting himself ready, check for validity of right and left players
@@ -113,8 +111,16 @@ class GameManager:
         if all(player.ready for player in self.player_mapping.values()):
             await self.start_game()
 
-
     async def start_round(self):
         for player in self.game_data.players:
             player.roll_dice()
-            await self.connection_manager.send(player, self.game_data.round_start_json(player))
+
+        await asyncio.gather(
+            *(self.connection_manager.send(
+                player, self.game_data.round_start_json()) for player in self.game_data.players)
+        )
+
+        await asyncio.gather(
+            *(self.connection_manager.send(
+                player, RoundStart.from_player(player)) for player in self.game_data.players)
+        )

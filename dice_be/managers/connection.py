@@ -3,12 +3,14 @@ Connection management
 """
 import asyncio
 import json
-from typing import Iterable
+from pprint import pformat
 
 from odmantic import ObjectId
 from pydantic import BaseModel
 from starlette.websockets import WebSocket
+from loguru import logger
 
+from dice_be.models.games import PlayerData
 from dice_be.models.users import User
 
 
@@ -42,27 +44,29 @@ class ConnectionManager:
         """
         del self.connections[client.id]
 
-    async def send(self, client: User, data: str | dict | BaseModel):
+    async def send(self, client: User | PlayerData, data: str | dict | BaseModel):
         if isinstance(data, dict):
             data = json.dumps(data)
         elif isinstance(data, BaseModel):
             data = data.json()
         
-        print(f"Sending to {client.id}, {client.name}: {data}")
+        logger.debug(f'Sending to {client.name}: {pformat(data)}')
         await self.connections[client.id].send_text(data)
 
-    async def broadcast(self, data: str | dict, *, exclude: Iterable[User] = ()):
+    async def broadcast(self, data: str | dict | BaseModel, *, exclude: User = None):
         """
         Broadcast a message to all clients
         """
-        exclude_ids = set(user.id for user in exclude)
-        
-        print(f"Broadcasting {data}")
+        exclude_ids = {exclude.id} if exclude else {}
+
+        logger.debug(f'Broadcasting {pformat(data)}{f", excluding {exclude.name}" if exclude else ""}')
 
         if isinstance(data, dict):
             data = json.dumps(data)
+        elif isinstance(data, BaseModel):
+            data = data.json()
 
         await asyncio.gather(
             *(connection.send_text(data)
-              for client, connection in self.connections.items() if client not in exclude_ids)
+              for client_id, connection in self.connections.items() if client_id not in exclude_ids)
         )

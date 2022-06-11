@@ -32,8 +32,9 @@ class PlayerData(MongoModel):
     left_player_id: OID = None
     right_player_id: OID = None
 
-    def roll_dice(self):
+    def roll_dice(self) -> 'PlayerData':
         self.dice = [random.randint(1, 6) for _ in range(self.current_dice_count)]
+        return self
 
 
 class GameRules(MongoModel):
@@ -51,14 +52,20 @@ class GameData(MongoModel):
     progression: GameProgression = GameProgression.LOBBY
     rules: GameRules = GameRules()
     players: list[PlayerData] = []
-    admin: PlayerData = None
 
     def add_player(self, player: User):
         self.players.append(player := PlayerData(id=player.id, name=player.name))
         return player
 
+    def remove_player(self, player: User):
+
+        for p in self.players:
+            if player.id == p.id:
+                # It's probably ok to remove values while iterating over the list because we return right after
+                return self.players.remove(p)
+
     def lobby_json(self, *data_filter) -> str:
-        includes = {'event', 'progression', 'rules', 'players', 'admin'}
+        includes = {'event', 'progression', 'rules', 'players'}
 
         if not data_filter:
             return self.json(include=includes)
@@ -68,11 +75,11 @@ class GameData(MongoModel):
     def player_update_json(self) -> str:
         return self.json(include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}})
 
-    def start_game_json(self):
-        return self.json(include={'event': True,
-         'rules': {'__all__': {'initial_dice_count', 'paso_allowed', 'exact_allowed'}}})
+    def start_game_json(self) -> str:
+        return self.json(include={'event': True, 'rules': True})
 
-    def round_start_json(self, player: PlayerData):
-        return self.json(include={'event': True, 
+    def round_start_json(self) -> str:
+        return self.json(include={
+            'event': True,
             'players': {'__all__': {'id', 'name', 'current_dice_count'}},
-            'dice': player.dice})
+        })

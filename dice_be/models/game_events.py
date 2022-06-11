@@ -2,7 +2,7 @@ from typing import Literal, Union, List
 
 from pydantic import Field
 
-from dice_be.models.games import PlayerData, Dice, GameData
+from dice_be.models.games import PlayerData, Dice, GameData, GameRules
 from dice_be.models.utils import OID, MongoModel
 
 
@@ -29,13 +29,17 @@ class PlayerLeave(MongoModel):
     """
     event: Literal['player_leave']
 
+class GameStart(MongoModel):
+    event: Literal['game_start'] = 'game_start'
+    rules: GameRules
+
 class RoundStart(MongoModel):
     event: Literal['round_start'] = 'round_start'
-    player_dice: List[Dice]
+    dice: List[Dice]
 
     @classmethod
     def from_player(cls, player: PlayerData):
-        return cls(player_dice=player.dice)
+        return cls(dice=player.dice)
 
 
 class Accusation(MongoModel):
