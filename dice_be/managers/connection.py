@@ -47,7 +47,8 @@ class ConnectionManager:
             data = json.dumps(data)
         elif isinstance(data, BaseModel):
             data = data.json()
-
+        
+        print(f"Sending to {client.id}, {client.name}: {data}")
         await self.connections[client.id].send_text(data)
 
     async def broadcast(self, data: str | dict, *, exclude: Iterable[User] = ()):
@@ -55,6 +56,8 @@ class ConnectionManager:
         Broadcast a message to all clients
         """
         exclude_ids = set(user.id for user in exclude)
+        
+        print(f"Broadcasting {data}")
 
         if isinstance(data, dict):
             data = json.dumps(data)

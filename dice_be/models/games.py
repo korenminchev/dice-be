@@ -27,13 +27,13 @@ class PlayerData(MongoModel):
     id: OID = Field(default_factory=lambda: OID(ObjectId()))
     name: str = ''
     dice: List[Dice] = []
-    mistakes: PositiveInt = 0
+    current_dice_count: PositiveInt = 0
     ready: bool = False
     left_player_id: OID = None
     right_player_id: OID = None
 
-    def roll_dice(self, max_dice: int):
-        self.dice = [random.randint(1, 6) for _ in range(max_dice - self.mistakes)]
+    def roll_dice(self):
+        self.dice = [random.randint(1, 6) for _ in range(self.current_dice_count)]
 
 
 class GameRules(MongoModel):
@@ -67,3 +67,12 @@ class GameData(MongoModel):
 
     def player_update_json(self) -> str:
         return self.json(include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}})
+
+    def start_game_json(self):
+        return self.json(include={'event': True,
+         'rules': {'__all__': {'initial_dice_count', 'paso_allowed', 'exact_allowed'}}})
+
+    def round_start_json(self, player: PlayerData):
+        return self.json(include={'event': True, 
+            'players': {'__all__': {'id', 'name', 'current_dice_count'}},
+            'dice': player.dice})

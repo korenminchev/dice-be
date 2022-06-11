@@ -2,10 +2,11 @@
 Game logic management
 """
 
+from secrets import choice
 from bson import ObjectId
 from fastapi import WebSocket
 
-from dice_be.models.games import GameData, Code, GameProgression, GameRules, PlayerData
+from dice_be.models.games import GameData, Code, GameProgression, GameRules, GameStart, PlayerData
 from dice_be.models.users import User
 from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm
 from dice_be.managers.connection import ConnectionManager
@@ -70,18 +71,20 @@ class GameManager:
         pass
 
     async def start_game(self):
+        # Initialize all players dice count
+        for player in self.game_data.players:
+            player.current_dice_count = self.game_data.rules.initial_dice_count
         self.game_data.progression = GameProgression.IN_GAME
-        await self.connection_manager.broadcast(self.game_data.lobby_json('progression'))
+        starting_player = choice(self.game_data.players)
+        await self.connection_manager.broadcast(GameStart(starting_player_id=starting_player.id).json())
+        await self.start_round()
+
 
     def check_position(self, player: User, data: PlayerReady) -> tuple[bool, str | None]:
-        print(f'Checking position of player {player.id}, {player.name}')
-        print(f'Current player mapping: {list(self.player_mapping.values())}')
-        print(f'Current game player list: {self.game_data.players}')
         # Player is setting himself ready, check for validity of right and left players
         for other_player in self.player_mapping.values():
             # Skip checking against the same players or against unready players
             if str(player.id) == str(other_player.id) or not other_player.ready:
-                print(f'Skipped checking against player {other_player}')
                 continue
 
             if other_player.right_player_id == data.right_player_id:
@@ -109,3 +112,9 @@ class GameManager:
 
         if all(player.ready for player in self.player_mapping.values()):
             await self.start_game()
+
+
+    async def start_round(self):
+        for player in self.game_data.players:
+            player.roll_dice()
+            await self.connection_manager.send(player, self.game_data.round_start_json(player))
