@@ -46,7 +46,7 @@ async def check_player_in_game(code: str, user_id: str):
     """
     Checks if the player is in the game
     """
-    return user_id in playground.get_game(code).player_mapping
+    return ObjectId(user_id) in playground.get_game(code).player_mapping
 
 # pylint:disable=redefined-builtin, invalid-name
 @router.websocket("/{code}/ws/")

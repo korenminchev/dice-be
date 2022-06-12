@@ -6,7 +6,7 @@ from enum import Enum
 from typing import TypeAlias, List, Literal
 
 from bson import ObjectId
-from pydantic import conint, PositiveInt, Field
+from pydantic import conint, Field, NonNegativeInt
 
 from dice_be.models.users import User
 from dice_be.models.utils import MongoModel, OID
@@ -27,7 +27,7 @@ class PlayerData(MongoModel):
     id: OID = Field(default_factory=lambda: OID(ObjectId()))
     name: str = ''
     dice: List[Dice] = []
-    current_dice_count: PositiveInt = 0
+    current_dice_count: NonNegativeInt = 0
     ready: bool = False
     left_player_id: OID = None
     right_player_id: OID = None
