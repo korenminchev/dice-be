@@ -41,7 +41,7 @@ async def get_game_state(code: str):
     """
     return playground.get_game(code).game_data.progression
 
-@router.get('/{code}/{user_id}}', response_model=bool, responses=GameNotFound.response())
+@router.get('/{code}/{user_id}', response_model=bool, responses=GameNotFound.response())
 async def check_player_in_game(code: str, user_id: str):
     """
     Checks if the player is in the game
