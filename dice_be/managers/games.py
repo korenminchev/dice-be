@@ -53,6 +53,9 @@ class GameManager:
         # Send the lobby data to the player
         await self.connection_manager.send(player, self.game_data.lobby_json())
 
+        if self.game_data.progression == GameProgression.IN_GAME:
+            await self.connection_manager.send(player, RoundStart.from_player(self.player_mapping[player.id]))
+
     async def handle_player_leave(self, player: User):
         await self.connection_manager.disconnect(player)
         player_data = self.player_mapping.pop(player.id)
