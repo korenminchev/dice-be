@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Literal, Union, List
 
 from pydantic import Field
@@ -42,12 +43,18 @@ class RoundStart(MongoModel):
         return cls(dice=player.dice)
 
 
+class AccusationType(str, Enum):
+    Standard = 'standard'
+    Exact = 'exact'
+    Paso = 'paso'
+
 class Accusation(MongoModel):
-    accuser: OID
-    accused: OID
-    die_value: int
-    dice_count: int
+    event: Literal['accusation']
+    accusation_type: AccusationType
+    accused_player: OID
+    die_value: int = None
+    dice_count: int = None
 
 class Event(MongoModel):
-    __root__: Union[PlayerReady, PlayerLeave, GameData] = Field(..., discriminator='event')
+    __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')
 

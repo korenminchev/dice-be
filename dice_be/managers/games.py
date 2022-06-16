@@ -8,7 +8,8 @@ from fastapi import WebSocket
 
 from dice_be.models.games import GameData, Code, GameProgression, GameRules, PlayerData
 from dice_be.models.users import User
-from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm, GameStart, RoundStart
+from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm, GameStart, RoundStart, Accusation, \
+    AccusationType
 from dice_be.managers.connection import ConnectionManager
 
 
@@ -30,12 +31,12 @@ class GameManager:
         event = Event.parse_obj(data).__root__
 
         match event:
-            case GameData():
-                await self.handle_game_update(player, event)
             case PlayerLeave():
                 await self.handle_player_leave(player)
             case PlayerReady():
                 await self.handle_player_ready(player, event)
+            case Accusation():
+                await self.handle_accusation(player, event)
 
     async def handle_connect(self, player: User, connection: WebSocket):
         # Add the connection so we can send data
@@ -68,9 +69,6 @@ class GameManager:
         :param player: The player that disconnected
         """
         self.connection_manager.remove_connection(player)
-
-    async def handle_game_update(self, player: User, data: GameData):
-        pass
 
     async def start_game(self):
         # Initialize all players dice count
@@ -127,3 +125,25 @@ class GameManager:
             *(self.connection_manager.send(
                 player, RoundStart.from_player(player)) for player in self.game_data.players)
         )
+
+    async def handle_accusation(self, player: User, event: Accusation):
+        correct_accusation = False
+        accused_player = self.player_mapping[ObjectId(event.accused_player)]
+
+        match event.accusation_type:
+            case AccusationType.Standard:
+                # The player's dice count is lower than the claimed dice count
+                if accused_player.dice.count(event.die_value) < event.dice_count:
+                    correct_accusation = True
+            case AccusationType.Exact:
+                if accused_player.dice.count(event.die_value) != event.dice_count:
+                    correct_accusation = True
+            case AccusationType.Paso:
+                pass
+
+        if correct_accusation:
+            accused_player.current_dice_count -= 1
+        else:
+            self.player_mapping[player.id].current_dice_count -= 1
+
+        await self.start_round()
