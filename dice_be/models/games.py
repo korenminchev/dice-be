@@ -13,6 +13,7 @@ from dice_be.models.utils import MongoModel, OID
 
 Code: TypeAlias = str
 Dice: TypeAlias = conint(ge=1, le=6)
+JokerDice = 1
 
 # pylint: disable=abstract-method
 class GameProgression(str, Enum):
@@ -83,3 +84,6 @@ class GameData(MongoModel):
             'event': True,
             'players': {'__all__': {'id', 'name', 'current_dice_count'}},
         })
+
+    def players_dice(self) -> str:
+        return [{"id": p.id, "name": p.name, "dice": p.dice} for p in self.players]

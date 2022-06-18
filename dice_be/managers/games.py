@@ -6,9 +6,9 @@ import asyncio
 from bson import ObjectId
 from fastapi import WebSocket
 
-from dice_be.models.games import GameData, Code, GameProgression, GameRules, PlayerData
+from dice_be.models.games import GameData, Code, GameProgression, GameRules, JokerDice, PlayerData
 from dice_be.models.users import User
-from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm, GameStart, RoundStart, Accusation, \
+from dice_be.models.game_events import Event, PlayerLeave, PlayerReady, ReadyConfirm, GameStart, RoundEnd, RoundStart, Accusation, \
     AccusationType
 from dice_be.managers.connection import ConnectionManager
 
@@ -130,13 +130,33 @@ class GameManager:
         correct_accusation = False
         accused_player = self.player_mapping[ObjectId(event.accused_player)]
 
-        match event.accusation_type:
+        match event.type:
             case AccusationType.Standard:
-                # The player's dice count is lower than the claimed dice count
-                if accused_player.dice.count(event.die_value) < event.dice_count:
-                    correct_accusation = True
+                # Check if the total dice in the game with the accusation dice value is greater the accusation dice count
+                total_acussed_count = sum(player.dice.count(event.dice_value) for player in self.game_data.players)
+                # Calculate the joker dice count
+                total_joker_count = sum(player.dice.count(JokerDice) for player in self.game_data.players)
+                
+                if event.dice_value == JokerDice:
+                    correct_accusation = event.dice_count > total_joker_count
+                else:
+                    correct_accusation = event.dice_count > total_acussed_count + total_joker_count
+                
+                winner = accused_player if not correct_accusation else self.player_mapping[ObjectId(player.id)]
+                loser = accused_player if correct_accusation else self.player_mapping[ObjectId(player.id)]
+
+                await self.connection_manager.broadcast(RoundEnd(
+                    winner=winner.id,
+                    loser=loser.id,
+                    correct_accusation=correct_accusation,
+                    accusation_type=event.type,
+                    dice_value=event.dice_value,
+                    dice_count=total_acussed_count if event.dice_value != JokerDice else 0,
+                    joker_count=total_joker_count,
+                    players=self.game_data.players_dice()
+                ).json())
             case AccusationType.Exact:
-                if accused_player.dice.count(event.die_value) != event.dice_count:
+                if accused_player.dice.count(event.dice_value) != event.dice_count:
                     correct_accusation = True
             case AccusationType.Paso:
                 pass

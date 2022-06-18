@@ -50,11 +50,21 @@ class AccusationType(str, Enum):
 
 class Accusation(MongoModel):
     event: Literal['accusation']
-    accusation_type: AccusationType
+    type: AccusationType
     accused_player: OID
-    die_value: int = None
+    dice_value: int = None
     dice_count: int = None
 
+class RoundEnd(MongoModel):
+    event: Literal['round_end'] = 'round_end'
+    winner: OID
+    loser: OID
+    correct_accusation: bool
+    accusation_type: AccusationType
+    dice_value: int = None
+    dice_count: int = None
+    joker_count: int = None
+    players: list
 class Event(MongoModel):
     __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')
 
