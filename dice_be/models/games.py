@@ -2,6 +2,7 @@
 Models for games and game metadata
 """
 import random
+from collections import Counter
 from enum import Enum
 from typing import TypeAlias, List, Literal
 
@@ -13,7 +14,7 @@ from dice_be.models.utils import MongoModel, OID
 
 Code: TypeAlias = str
 Dice: TypeAlias = conint(ge=1, le=6)
-JokerDice = 1
+JOKER_DICE = 1
 
 # pylint: disable=abstract-method
 class GameProgression(str, Enum):
@@ -37,6 +38,20 @@ class PlayerData(MongoModel):
         self.dice = [random.randint(1, 6) for _ in range(self.current_dice_count)]
         return self
 
+    def is_paso(self) -> bool:
+        if len(self.dice) != 5:
+            return False
+
+        dice_set = set(self.dice)
+        if len(dice_set) == 4:
+            return True
+
+        if len(dice_set) == 2:
+            (_, most_common_count), = Counter(self.dice).most_common(1)
+            if most_common_count == 4:
+                return True
+
+        return False
 
 class GameRules(MongoModel):
     initial_dice_count: int = 5
@@ -86,4 +101,5 @@ class GameData(MongoModel):
         })
 
     def players_dice(self) -> str:
-        return [{"id": p.id, "name": p.name, "dice": p.dice} for p in self.players]
+        # return [{"id": p.id, "name": p.name, "dice": p.dice} for p in self.players]
+        return self.json(include={})

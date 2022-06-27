@@ -65,6 +65,22 @@ class RoundEnd(MongoModel):
     dice_count: int = None
     joker_count: int = None
     players: list
+
+    @classmethod
+    def from_context(cls, accusation: Accusation, correct_accusation: bool,
+                     dice_count: int, joker_count: int, game_data: GameData,
+                     winner: PlayerData, loser: PlayerData):
+        return cls(
+            winner=winner.id,
+            loser=loser.id,
+            correct_accusation=correct_accusation,
+            accusation_type=accusation.type,
+            dice_value=accusation.dice_value,
+            dice_count=dice_count,
+            joker_count=joker_count,
+            players=game_data.players_dice()
+        )
+
 class Event(MongoModel):
     __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')
 
