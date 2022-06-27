@@ -140,14 +140,15 @@ class GameManager:
                 correct_accusation = claimed_count > total_count
 
             case AccusationType.Exact:
-                correct_accusation = claimed_count != total_count
+                correct_accusation = claimed_count == total_count
 
             case AccusationType.Paso:
                 correct_accusation = not accused_player.is_paso()
 
         if correct_accusation:
             winner, loser = accuser, accused_player
-            accused_player.current_dice_count -= 1
+            if event.type != AccusationType.Exact:
+                accused_player.current_dice_count -= 1
         else:
             loser, winner = accuser, accused_player
             accuser.current_dice_count -= 1

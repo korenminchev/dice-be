@@ -64,7 +64,7 @@ class RoundEnd(MongoModel):
     dice_value: int = None
     dice_count: int = None
     joker_count: int = None
-    players: list
+    players: str
 
     @classmethod
     def from_context(cls, accusation: Accusation, correct_accusation: bool,

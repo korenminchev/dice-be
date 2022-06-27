@@ -102,4 +102,4 @@ class GameData(MongoModel):
 
     def players_dice(self) -> str:
         # return [{"id": p.id, "name": p.name, "dice": p.dice} for p in self.players]
-        return self.json(include={})
+        return self.json(include={'players': {'__all__': {'id', 'name', 'dice'}}})
