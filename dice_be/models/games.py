@@ -4,6 +4,7 @@ Models for games and game metadata
 import random
 from collections import Counter
 from enum import Enum
+from math import ceil
 from typing import TypeAlias, List, Literal
 
 from bson import ObjectId
@@ -24,6 +25,14 @@ class GameProgression(str, Enum):
     LOBBY = 'lobby'
     IN_GAME = 'in_game'
 
+class PasoBehavior(str, Enum):
+    """
+    Represents how paso behaves in the game
+    """
+    Disabled = 'disabled'
+    Classic = 'classic' # Works only when u have 5 dice
+    Scalable = 'scalable' # Scalable paso
+
 
 class PlayerData(MongoModel):
     id: OID = Field(default_factory=lambda: OID(ObjectId()))
@@ -38,25 +47,29 @@ class PlayerData(MongoModel):
         self.dice = [random.randint(1, 6) for _ in range(self.current_dice_count)]
         return self
 
-    def is_paso(self) -> bool:
-        if len(self.dice) != 5:
-            return False
+    def is_paso(self, behavior: PasoBehavior) -> bool:
+        if behavior == PasoBehavior.Classic:
+            if len(self.dice) != 5:
+                return False
+
+        if behavior == PasoBehavior.Scalable:
+            if len(self.dice) < 5:
+                return False
 
         dice_set = set(self.dice)
-        if len(dice_set) == 4:
+        if len(dice_set) == len(self.dice) - 1:
             return True
 
         if len(dice_set) == 2:
             (_, most_common_count), = Counter(self.dice).most_common(1)
-            if most_common_count == 4:
+            if most_common_count >= ceil(len(self.dice) / 2):
                 return True
 
         return False
 
 class GameRules(MongoModel):
     initial_dice_count: int = 5
-    paso_allowed: bool = True
-    exact_allowed: bool = True
+    paso_behavior = PasoBehavior
 
 
 class GameData(MongoModel):

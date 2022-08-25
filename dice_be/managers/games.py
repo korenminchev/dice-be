@@ -143,7 +143,7 @@ class GameManager:
                 correct_accusation = claimed_count == total_count
 
             case AccusationType.Paso:
-                correct_accusation = not accused_player.is_paso()
+                correct_accusation = not accused_player.is_paso(self.game_data.rules.paso_behavior)
 
         if correct_accusation:
             winner, loser = accuser, accused_player
