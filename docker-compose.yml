@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  backend:
+    build: .
+    stdin_open: true
+    tty: true
+    ports:
+      - "443:8000"
+    environment:
+      - UVICORN_SSL_CERTFILE=/root/secrets/certfile.pem
+      - UVICORN_SSL_KEYFILE=/root/secrets/keyfile.pem
+    volumes:
+      - ./secrets:/root/secrets/
+    command: uvicorn dice_be.__main__:app --reload --host 0.0.0.0 
+
+  mongodb:
+    image: "mongo:5.0"
+    volumes:
+      - db:/data/db
+      
+volumes:
+  db:
