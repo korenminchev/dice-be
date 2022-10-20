@@ -4,7 +4,6 @@ Connection management
 import asyncio
 import json
 from pprint import pformat
-from typing import Callable
 
 from odmantic import ObjectId
 from pydantic import BaseModel
