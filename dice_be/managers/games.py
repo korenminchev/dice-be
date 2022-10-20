@@ -118,12 +118,14 @@ class GameManager:
 
         await asyncio.gather(
             *(self.connection_manager.send(
-                player, self.game_data.round_start_json()) for player in self.game_data.players)
+                player, self.game_data.round_start_json()) for player in self.game_data.players),
+            return_exceptions=False
         )
 
         await asyncio.gather(
             *(self.connection_manager.send(
-                player, RoundStart.from_player(player)) for player in self.game_data.players)
+                player, RoundStart.from_player(player)) for player in self.game_data.players),
+            return_exceptions=False
         )
 
     async def handle_accusation(self, player: User, event: Accusation):

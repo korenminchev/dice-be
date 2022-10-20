@@ -4,6 +4,7 @@ Connection management
 import asyncio
 import json
 from pprint import pformat
+from typing import Callable
 
 from odmantic import ObjectId
 from pydantic import BaseModel
@@ -49,9 +50,12 @@ class ConnectionManager:
             data = json.dumps(data)
         elif isinstance(data, BaseModel):
             data = data.json()
-        
-        logger.debug(f'Sending to {client.name}: {pformat(data)}')
-        await self.connections[client.id].send_text(data)
+
+        try:
+            logger.debug(f'Sending text to {client.name}')
+            await self.connections[client.id].send_text(data)
+        except KeyError as e:
+            raise LookupError(f'Client {client.name} is not connected') from e
 
     async def broadcast(self, data: str | dict | BaseModel, *, exclude: User = None):
         """
@@ -68,5 +72,6 @@ class ConnectionManager:
 
         await asyncio.gather(
             *(connection.send_text(data)
-              for client_id, connection in self.connections.items() if client_id not in exclude_ids)
+                for client_id, connection in self.connections.items() if client_id not in exclude_ids),
+            return_exceptions=False
         )
