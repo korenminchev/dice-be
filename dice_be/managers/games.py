@@ -116,17 +116,8 @@ class GameManager:
         for player in self.game_data.players:
             player.roll_dice()
 
-        await asyncio.gather(
-            *(self.connection_manager.send(
-                player, self.game_data.round_start_json()) for player in self.game_data.players),
-            return_exceptions=False
-        )
-
-        await asyncio.gather(
-            *(self.connection_manager.send(
-                player, RoundStart.from_player(player)) for player in self.game_data.players),
-            return_exceptions=False
-        )
+        await self.connection_manager.broadcast(self.game_data.round_start_json())
+        await self.connection_manager.personal_broadcast(RoundStart.from_player, self.player_mapping)
 
     async def handle_accusation(self, player: User, event: Accusation):
         correct_accusation = False

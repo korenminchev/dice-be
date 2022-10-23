@@ -81,6 +81,6 @@ class RoundEnd(MongoModel):
             players=game_data.players_dice()
         )
 
-class Event(MongoModel):
-    __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')
 
+class Event(MongoModel):
+    __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')   
