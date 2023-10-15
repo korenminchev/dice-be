@@ -20,7 +20,7 @@ def test_strict_pydantic():
 
 
 def test_game_data():
-    gd = GameData(event='game_update', code=1234, players=[PlayerData(dice=[1, 2, 3]), PlayerData(dice=[4, 5, 6])])
+    gd = GameData(event='game_update', code='1234', players=[PlayerData(dice=[1, 2, 3]), PlayerData(dice=[4, 5, 6])])
     player_update_dict = json.loads(gd.player_update_json())
     assert player_update_dict['event'] == 'game_update'
     assert all('name' in p for p in player_update_dict['players'])
