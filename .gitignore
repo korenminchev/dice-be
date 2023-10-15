@@ -1,3 +1,5 @@
 .idea/
 __pycache__/
 dist/
+*.pem
+docker-compose.prod.yml

@@ -8,18 +8,34 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-odmantic = "^0.3.5"
-fastapi = "^0.75.2"
-uvicorn = "^0.17.6"
+python = "^3.11"
+odmantic = "^0.9"
+fastapi = "^0.85.1"
+uvicorn = {extras = ["standard"], version = "^0.19.0"}
+bidict = "^0.22.0"
+pydantic = "^1.10.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.13.7"
+pylint = "^2.15.5"
+pytest = "^7.2.0"
+httpx = "^0.25.0"
+requests = "^2.31.0"
+anyio = "<4"
 
 [tool.pylint]
     [tool.pylint.'FORMAT']
     max-line-length=120
 
+    [tool.pylint.'MESSAGES CONTROL']
+    extension-pkg-whitelist = "pydantic"
+
+[tool.ruff]
+line-length = 120
+
+[tool.black]
+target-version = ['py311']
+skip-string-normalization = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
