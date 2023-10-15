@@ -2,7 +2,7 @@ from datetime import datetime
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from pydantic import BaseModel, BaseConfig
+from pydantic import BaseConfig, BaseModel
 
 
 class OID(str):
@@ -15,7 +15,8 @@ class OID(str):
         try:
             return ObjectId(str(v))
         except InvalidId:
-            raise ValueError("Not a valid ObjectId")
+            msg = "Not a valid ObjectId"
+            raise ValueError(msg)
 
 
 class MongoModel(BaseModel):
