@@ -5,6 +5,6 @@ from odmantic import AIOEngine
 
 from dice_be.managers.playground import Playground
 
-client = AsyncIOMotorClient("mongodb://mongodb:27017/")
-engine = AIOEngine(client=client, database="dice")
+client = AsyncIOMotorClient('mongodb://mongodb:27017/')
+engine = AIOEngine(client=client, database='dice')
 playground = Playground()

@@ -33,7 +33,7 @@ class NotFoundHttpError(LookupError):
     @classmethod
     def response(cls):
         """Response information, used for OpenAPI documentation."""
-        return {cls.response_code: {"model": cls.ResponseModel}}
+        return {cls.response_code: {'model': cls.ResponseModel}}
 
 
 class IDNotFound(NotFoundHttpError):
@@ -46,7 +46,7 @@ class IDNotFound(NotFoundHttpError):
         super().__init__()
 
     def __str__(self) -> str:
-        return f"Unable to find {self.model.__name__} with ID {self.id}"
+        return f'Unable to find {self.model.__name__} with ID {self.id}'
 
 
 class GameNotFound(NotFoundHttpError):
@@ -59,4 +59,4 @@ class GameNotFound(NotFoundHttpError):
         super().__init__()
 
     def __str__(self) -> str:
-        return f"Unable to find any game with the code {self.code}"
+        return f'Unable to find any game with the code {self.code}'

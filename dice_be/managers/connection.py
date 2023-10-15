@@ -50,10 +50,10 @@ class ConnectionManager:
             client = client.id
 
         try:
-            logger.debug(f"Sending text to {client}")
+            logger.debug(f'Sending text to {client}')
             await self.connections[client].send_text(data)
         except KeyError as e:
-            msg = f"Client {client} is not connected"
+            msg = f'Client {client} is not connected'
             raise LookupError(msg) from e
 
     async def broadcast(self, data: str | dict | BaseModel, *, exclude: User = None):

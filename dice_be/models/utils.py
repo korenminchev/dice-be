@@ -15,7 +15,7 @@ class OID(str):
         try:
             return ObjectId(str(v))
         except InvalidId:
-            msg = "Not a valid ObjectId"
+            msg = 'Not a valid ObjectId'
             raise ValueError(msg)
 
 

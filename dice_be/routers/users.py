@@ -9,8 +9,8 @@ from dice_be.exceptions import IDNotFound
 from dice_be.models.users import User
 
 router = APIRouter(
-    prefix="/users",
-    tags=["Users"],
+    prefix='/users',
+    tags=['Users'],
 )
 
 
@@ -26,13 +26,13 @@ async def get_user_by_id(id: ObjectId) -> User:
     raise IDNotFound(User, id)
 
 
-@router.get("/", response_model=list[User])
+@router.get('/', response_model=list[User])
 async def get_all_users():
     """Retrieve a list of all users."""
     return await db.find(User)
 
 
-@router.post("/", response_model=User)
+@router.post('/', response_model=User)
 async def create_user(name: str = Body(..., embed=True)):
     """Create a single user with a given name."""
     return await db.save(User(name=name))
@@ -40,10 +40,10 @@ async def create_user(name: str = Body(..., embed=True)):
 
 # pylint:disable=redefined-builtin, invalid-name
 @router.get(
-    "/{id}/",
+    '/{id}/',
     response_model=User,
     responses=IDNotFound.response(),
-    name="Get User by ID",
+    name='Get User by ID',
 )
 async def get_user_by_id_endpoint(id: ObjectId):
     """Retrieve a single user by their ID."""
@@ -51,7 +51,7 @@ async def get_user_by_id_endpoint(id: ObjectId):
 
 
 # pylint:disable=redefined-builtin, invalid-name
-@router.post("/{id}/friends/", response_model=User, responses=IDNotFound.response())
+@router.post('/{id}/friends/', response_model=User, responses=IDNotFound.response())
 async def add_friends(id: ObjectId, friends: List[ObjectId] = Body(..., embed=True)):
     """Add a multiple friends to a single user by their IDs."""
     user = await get_user_by_id(id)

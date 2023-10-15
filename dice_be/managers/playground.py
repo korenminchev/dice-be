@@ -36,9 +36,9 @@ class Playground:
         return self.current_games[code]
 
     def _generate_code(self) -> Code:
-        code = f"{randint(1, 9999):04}"
+        code = f'{randint(1, 9999):04}'
 
         while code in self.current_games:
-            code = f"{randint(1, 9999):04}"
+            code = f'{randint(1, 9999):04}'
 
         return code

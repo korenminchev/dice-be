@@ -19,8 +19,8 @@ JOKER_DICE = 1
 class GameProgression(str, Enum):
     """Represents the current state of the game."""
 
-    LOBBY = "lobby"
-    IN_GAME = "in_game"
+    LOBBY = 'lobby'
+    IN_GAME = 'in_game'
 
 
 class PlayerData(MongoModel):
@@ -32,7 +32,7 @@ class PlayerData(MongoModel):
     left_player_id: OID = None
     right_player_id: OID = None
 
-    def roll_dice(self) -> "PlayerData":
+    def roll_dice(self) -> 'PlayerData':
         self.dice = [random.randint(1, 6) for _ in range(self.current_dice_count)]
         return self
 
@@ -61,7 +61,7 @@ class GameRules(MongoModel):
 class GameData(MongoModel):
     """Data of an active game."""
 
-    event: Literal["game_update"]
+    event: Literal['game_update']
     code: Code
     progression: GameProgression = GameProgression.LOBBY
     rules: GameRules = GameRules()
@@ -79,28 +79,28 @@ class GameData(MongoModel):
         return None
 
     def lobby_json(self, *data_filter) -> str:
-        includes = {"event", "progression", "rules", "players"}
+        includes = {'event', 'progression', 'rules', 'players'}
 
         if not data_filter:
             return self.json(include=includes)
 
-        return self.json(include=includes & (set(data_filter) | {"event"}))
+        return self.json(include=includes & (set(data_filter) | {'event'}))
 
     def player_update_json(self) -> str:
         return self.json(
-            include={"event": True, "players": {"__all__": {"id", "name", "ready"}}},
+            include={'event': True, 'players': {'__all__': {'id', 'name', 'ready'}}},
         )
 
     def start_game_json(self) -> str:
-        return self.json(include={"event": True, "rules": True})
+        return self.json(include={'event': True, 'rules': True})
 
     def round_start_json(self) -> str:
         return self.json(
             include={
-                "event": True,
-                "players": {"__all__": {"id", "name", "current_dice_count"}},
+                'event': True,
+                'players': {'__all__': {'id', 'name', 'current_dice_count'}},
             },
         )
 
     def players_dice(self) -> str:
-        return self.json(include={"players": {"__all__": {"id", "name", "dice"}}})
+        return self.json(include={'players': {'__all__': {'id', 'name', 'dice'}}})

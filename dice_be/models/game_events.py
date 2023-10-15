@@ -12,14 +12,14 @@ class PlayerReady(MongoModel):
     Broadcast from server.
     """
 
-    event: Literal["player_ready"]
+    event: Literal['player_ready']
     ready: bool
     left_player_id: OID
     right_player_id: OID
 
 
 class ReadyConfirm(MongoModel):
-    event: Literal["ready_confirm"] = "ready_confirm"
+    event: Literal['ready_confirm'] = 'ready_confirm'
     success: bool
     error: str = None
 
@@ -27,16 +27,16 @@ class ReadyConfirm(MongoModel):
 class PlayerLeave(MongoModel):
     """Signals to the server that the player is leaving."""
 
-    event: Literal["player_leave"]
+    event: Literal['player_leave']
 
 
 class GameStart(MongoModel):
-    event: Literal["game_start"] = "game_start"
+    event: Literal['game_start'] = 'game_start'
     rules: GameRules
 
 
 class RoundStart(MongoModel):
-    event: Literal["round_start"] = "round_start"
+    event: Literal['round_start'] = 'round_start'
     dice: List[Dice]
 
     @classmethod
@@ -45,13 +45,13 @@ class RoundStart(MongoModel):
 
 
 class AccusationType(str, Enum):
-    Standard = "standard"
-    Exact = "exact"
-    Paso = "paso"
+    Standard = 'standard'
+    Exact = 'exact'
+    Paso = 'paso'
 
 
 class Accusation(MongoModel):
-    event: Literal["accusation"]
+    event: Literal['accusation']
     type: AccusationType
     accused_player: OID
     dice_value: int = None
@@ -59,7 +59,7 @@ class Accusation(MongoModel):
 
 
 class RoundEnd(MongoModel):
-    event: Literal["round_end"] = "round_end"
+    event: Literal['round_end'] = 'round_end'
     winner: OID
     loser: OID
     correct_accusation: bool
@@ -95,5 +95,5 @@ class RoundEnd(MongoModel):
 class Event(MongoModel):
     __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(
         ...,
-        discriminator="event",
+        discriminator='event',
     )

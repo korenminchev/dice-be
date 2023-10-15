@@ -30,7 +30,7 @@ class GameManager:
     """Manages the progression of a single game."""
 
     def __init__(self, code: Code, game_rules: GameRules) -> None:
-        self.game_data = GameData(event="game_update", code=code, rules=game_rules)
+        self.game_data = GameData(event='game_update', code=code, rules=game_rules)
         self.player_mapping: dict[ObjectId, PlayerData] = {}
         self.connection_manager = ConnectionManager()
 
@@ -112,13 +112,13 @@ class GameManager:
                 right_player = self.player_mapping[ObjectId(data.right_player_id)]
                 return (
                     False,
-                    f"{right_player.name} is already to the right of {other_player.name}",
+                    f'{right_player.name} is already to the right of {other_player.name}',
                 )
             elif other_player.left_player_id == data.left_player_id:
                 left_player = self.player_mapping[ObjectId(data.left_player_id)]
                 return (
                     False,
-                    f"{left_player.name} is already to the left of {other_player.name}",
+                    f'{left_player.name} is already to the left of {other_player.name}',
                 )
 
         return True, None

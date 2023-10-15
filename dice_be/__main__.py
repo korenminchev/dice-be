@@ -11,10 +11,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://dice-new.web.app"],
+    allow_origins=['https://dice-new.web.app'],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=['*'],
+    allow_headers=['*'],
 )
 
 app.include_router(users.router)
@@ -28,13 +28,13 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Dice",
-        version="Pre-release",
-        description="Dice Game",
+        title='Dice',
+        version='Pre-release',
+        description='Dice Game',
         routes=app.routes,
     )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "https://raw.githubusercontent.com/Koren13n/dice-fe/master/assets/images/dice_logo.png",
+    openapi_schema['info']['x-logo'] = {
+        'url': 'https://raw.githubusercontent.com/Koren13n/dice-fe/master/assets/images/dice_logo.png',
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
