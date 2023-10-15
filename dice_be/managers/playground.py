@@ -15,6 +15,7 @@ class Playground:
 
     Games are NOT stored in a DB
     """
+
     def __init__(self):
         self.current_games: dict[Code, GameManager] = {}
 

@@ -46,7 +46,12 @@ async def create_user(name: str = Body(..., embed=True)):
 
 
 # pylint:disable=redefined-builtin, invalid-name
-@router.get('/{id}/', response_model=User, responses=IDNotFound.response(), name='Get User by ID')
+@router.get(
+    '/{id}/',
+    response_model=User,
+    responses=IDNotFound.response(),
+    name='Get User by ID',
+)
 async def get_user_by_id_endpoint(id: ObjectId):
     """
     Retrieve a single user by their ID

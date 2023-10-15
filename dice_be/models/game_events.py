@@ -12,6 +12,7 @@ class PlayerReady(MongoModel):
     Signals to the server that the player is ready
     Broadcast from server
     """
+
     event: Literal['player_ready']
     ready: bool
     left_player_id: OID
@@ -28,11 +29,14 @@ class PlayerLeave(MongoModel):
     """
     Signals to the server that the player is leaving
     """
+
     event: Literal['player_leave']
+
 
 class GameStart(MongoModel):
     event: Literal['game_start'] = 'game_start'
     rules: GameRules
+
 
 class RoundStart(MongoModel):
     event: Literal['round_start'] = 'round_start'
@@ -48,12 +52,14 @@ class AccusationType(str, Enum):
     Exact = 'exact'
     Paso = 'paso'
 
+
 class Accusation(MongoModel):
     event: Literal['accusation']
     type: AccusationType
     accused_player: OID
     dice_value: int = None
     dice_count: int = None
+
 
 class RoundEnd(MongoModel):
     event: Literal['round_end'] = 'round_end'
@@ -67,9 +73,16 @@ class RoundEnd(MongoModel):
     players: str
 
     @classmethod
-    def from_context(cls, accusation: Accusation, correct_accusation: bool,
-                     dice_count: int, joker_count: int, game_data: GameData,
-                     winner: PlayerData, loser: PlayerData):
+    def from_context(
+        cls,
+        accusation: Accusation,
+        correct_accusation: bool,
+        dice_count: int,
+        joker_count: int,
+        game_data: GameData,
+        winner: PlayerData,
+        loser: PlayerData,
+    ):
         return cls(
             winner=winner.id,
             loser=loser.id,
@@ -78,9 +91,11 @@ class RoundEnd(MongoModel):
             dice_value=accusation.dice_value,
             dice_count=dice_count,
             joker_count=joker_count,
-            players=game_data.players_dice()
+            players=game_data.players_dice(),
         )
 
 
 class Event(MongoModel):
-    __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(..., discriminator='event')   
+    __root__: Union[PlayerReady, PlayerLeave, Accusation] = Field(
+        ..., discriminator='event'
+    )

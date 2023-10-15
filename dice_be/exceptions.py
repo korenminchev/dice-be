@@ -14,12 +14,14 @@ class NotFoundHttpError(LookupError):
     """
     Base Exception for 404 NOT FOUND errors
     """
+
     response_code = HTTPStatus.NOT_FOUND.value
 
     class ResponseModel(BaseModel):
         """
         Response model used in the FastAPI exception handler
         """
+
         detail: str
 
     @staticmethod

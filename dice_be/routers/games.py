@@ -34,12 +34,16 @@ async def get_game(code: str):
     """
     return playground.get_game(code).game_data
 
-@router.get('/{code}/state', response_model=GameProgression, responses=GameNotFound.response())
+
+@router.get(
+    '/{code}/state', response_model=GameProgression, responses=GameNotFound.response()
+)
 async def get_game_state(code: str):
     """
     Gets the state of a game, use this before attempting to join
     """
     return playground.get_game(code).game_data.progression
+
 
 @router.get('/{code}/{user_id}', response_model=bool, responses=GameNotFound.response())
 async def check_player_in_game(code: str, user_id: str):
@@ -47,6 +51,7 @@ async def check_player_in_game(code: str, user_id: str):
     Checks if the player is in the game
     """
     return ObjectId(user_id) in playground.get_game(code).player_mapping
+
 
 # pylint:disable=redefined-builtin, invalid-name
 @router.websocket("/{code}/ws/")

@@ -12,5 +12,6 @@ class User(Model):
     """
     User data, this class defines how users are saved in the DB
     """
+
     name: str
     friend_ids: List[ObjectId] = []
